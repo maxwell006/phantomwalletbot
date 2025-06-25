@@ -18,7 +18,7 @@ mongoDBConnection();
 // Connect my Wallet Command here
 bot.command("connect", (ctx) => {
   const telegramId = ctx.from.id;
-  const callbackUrl = `http://192.168.137.1:3000/wallet-connected?telegramId=${telegramId}`;
+  const callbackUrl = `https://phantomwalletbot.onrender.com/wallet-connected?telegramId=${telegramId}`;
   const deeplink = `https://phantom.app/ul/v1/connect?app_url=https://mobilegigo.com&redirect_link=${encodeURIComponent(
     callbackUrl
   )}`;
