@@ -18,20 +18,36 @@ mongoDBConnection();
 
 // bot.command("start", asy)
 // Connect my Wallet Command here
-bot.command("connect", (ctx) => {
-  const telegramId = ctx.from.id;
-  const callbackUrl = `http://phantomwalletbot.onrender.com/wallet-connected?telegramId=${telegramId}`;
-  const deeplink = `https://phantom.app/ul/v1/connect?app_url=https://phantomwalletbot.onrender.com&redirect_link=https://phantomwalletbot.onrender.com/wallet-connected?telegramId=${telegramId}`;
-//   const deeplink = `https://phantom.app/ul/v1/connect?app_url=https://mobilegigo.com&redirect_link=${encodeURIComponent(
-//     callbackUrl
-//   )}`;
+// bot.command("connect", (ctx) => {
+//   const telegramId = ctx.from.id;
+//   const callbackUrl = `http://phantomwalletbot.onrender.com/wallet-connected?telegramId=${telegramId}`;
+//   const deeplink = `https://phantom.app/ul/v1/connect?app_url=https://phantomwalletbot.onrender.com&redirect_link=https://phantomwalletbot.onrender.com/wallet-connected?telegramId=${telegramId}`;
+// //   const deeplink = `https://phantom.app/ul/v1/connect?app_url=https://mobilegigo.com&redirect_link=${encodeURIComponent(
+// //     callbackUrl
+// //   )}`;
 
-  ctx.reply("Click below to connect your Phantom Wallet:", {
+//   ctx.reply("Click below to connect your Phantom Wallet:", {
+//     reply_markup: {
+//       inline_keyboard: [[{ text: "Connect Wallet", url: deeplink }]],
+//     },
+//   });
+// });
+
+
+
+bot.command('connect', (ctx) => {
+  const telegramId = ctx.from.id;
+  const redirectLink = `https://phantomwalletbot.onrender.com/wallet-connected?telegramId=${telegramId}`;
+  const deeplink = `https://phantom.app/ul/v1/connect?app_url=https://phantomwalletbot.onrender.com&redirect_link=${encodeURIComponent(redirectLink)}`;
+
+  ctx.reply('Click below to connect your Phantom Wallet:', {
     reply_markup: {
-      inline_keyboard: [[{ text: "Connect Wallet", url: deeplink }]],
+      inline_keyboard: [[{ text: 'Connect Wallet', url: deeplink }]],
     },
   });
 });
+
+
 
 // The Wallet Connect Callback (called by Phantom after wallet a successful connection)
 // app.get("/wallet-connected", async (req, res) => {
