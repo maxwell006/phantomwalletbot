@@ -3,6 +3,8 @@ const { Connection, PublicKey, clusterApiUrl } = require("@solana/web3.js");
 const express = require("express");
 const dotenv = require("dotenv");
 const User = require("./models/User");
+const bs58 = require('bs58');
+
 
 const mongoDBConnection = require("./config/mongodb");
 
@@ -18,10 +20,11 @@ mongoDBConnection();
 // Connect my Wallet Command here
 bot.command("connect", (ctx) => {
   const telegramId = ctx.from.id;
-  const callbackUrl = `https://phantomwalletbot.onrender.com/wallet-connected?telegramId=${telegramId}`;
-  const deeplink = `https://phantom.app/ul/v1/connect?app_url=https://mobilegigo.com&redirect_link=${encodeURIComponent(
-    callbackUrl
-  )}`;
+  const callbackUrl = `http://phantomwalletbot.onrender.com/wallet-connected?telegramId=${telegramId}`;
+  const deeplink = `https://phantom.app/ul/v1/connect?app_url=https://phantomwalletbot.onrender.com&redirect_link=https://phantomwalletbot.onrender.com/wallet-connected?telegramId=${telegramId}`;
+//   const deeplink = `https://phantom.app/ul/v1/connect?app_url=https://mobilegigo.com&redirect_link=${encodeURIComponent(
+//     callbackUrl
+//   )}`;
 
   ctx.reply("Click below to connect your Phantom Wallet:", {
     reply_markup: {
@@ -31,22 +34,54 @@ bot.command("connect", (ctx) => {
 });
 
 // The Wallet Connect Callback (called by Phantom after wallet a successful connection)
-app.get("/wallet-connected", async (req, res) => {
-  const { telegramId, public_key } = req.query;
-  if (!telegramId || !public_key) return res.send("Error connecting wallet");
+// app.get("/wallet-connected", async (req, res) => {
+//   const { telegramId, public_key } = req.query;
+//   if (!telegramId || !public_key) return res.send("Error connecting wallet");
+
+//   try {
+//     await User.findOneAndUpdate(
+//       { telegramId },
+//       { walletAddress: public_key },
+//       { upsert: true, new: true }
+//     );
+//     res.send(
+//       "Wallet connected successfully! You can return to Telegram and use /balance"
+//     );
+//   } catch (err) {
+//     res.send("Error saving wallet to database");
+//     console.log(err);
+//   }
+// });
+
+app.get('/wallet-connected', async (req, res) => {
+  const { d, telegramId, errorCode, errorMessage } = req.query;
+
+  if (errorCode) {
+    return res.send(`Phantom Error: ${decodeURIComponent(errorMessage)}`);
+  }
+
+  if (!d || !telegramId) {
+    return res.send('Missing required parameters');
+  }
 
   try {
+    // Decode base64-encoded string
+    const decoded = JSON.parse(Buffer.from(d, 'base64').toString());
+
+    const publicKey = decoded.public_key;
+
+    if (!publicKey) return res.send('No public key returned from Phantom');
+
     await User.findOneAndUpdate(
       { telegramId },
-      { walletAddress: public_key },
+      { walletAddress: publicKey },
       { upsert: true, new: true }
     );
-    res.send(
-      "Wallet connected successfully! You can return to Telegram and use /balance"
-    );
+
+    res.send('✅ Wallet connected successfully! You can return to Telegram and use /balance');
   } catch (err) {
-    res.send("Error saving wallet to database");
-    console.log(err);
+    console.error('Error parsing Phantom redirect:', err);
+    res.send('An error occurred while connecting wallet.');
   }
 });
 
