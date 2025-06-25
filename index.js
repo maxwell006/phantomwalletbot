@@ -5,7 +5,7 @@ const express = require('express');
 const mongoose = require('mongoose');
 const dotenv = require('dotenv');
 const { Connection, PublicKey, clusterApiUrl, Keypair } = require('@solana/web3.js');
-const bs58 = require('bs58');
+const bs58 = require('bs58').default;
 const nacl = require('tweetnacl');
 const User = require('./models/User');
 
