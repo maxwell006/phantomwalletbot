@@ -18,6 +18,7 @@
     "express": "^5.1.0",
     "mongoose": "^8.16.0",
     "nodemon": "^3.1.10",
-    "telegraf": "^4.16.3"
+    "telegraf": "^4.16.3",
+    "tweetnacl": "^1.0.3"
   }
 }
