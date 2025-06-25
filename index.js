@@ -56,9 +56,9 @@ bot.command("connect", (ctx) => {
 app.get('/wallet-connected', async (req, res) => {
   const { d, telegramId, errorCode, errorMessage } = req.query;
 
-  if (errorCode) {
-    return res.send(`Phantom Error: ${decodeURIComponent(errorMessage)}`);
-  }
+  // if (errorCode) {
+  //   return res.send(`Phantom Error: ${decodeURIComponent(errorMessage)}`);
+  // }
 
   if (!d || !telegramId) {
     return res.send('Missing required parameters');
