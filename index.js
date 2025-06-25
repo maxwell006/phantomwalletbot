@@ -74,17 +74,14 @@ bot.command('balance', async (ctx) => {
 // === Phantom Callback Route ===
 app.get('/wallet-connected', async (req, res) => {
   const { d, telegramId, errorCode, errorMessage } = req.query;
-  console.log('Query received:', req.query);
   if (errorCode) {
     return res.send(`Phantom Error: ${decodeURIComponent(errorMessage)}`);
   }
 
   if (!d) {
-    console.log("D:", d);
     return res.send('Missing wallet data or Telegram ID.');
   }
   if(!telegramId){
-      console.log("TelegramID:", telegramId);
     return res.send('Wallet connection was not completed. Please try again');
   }
 
