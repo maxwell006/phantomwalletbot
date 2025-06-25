@@ -72,25 +72,67 @@ bot.command('balance', async (ctx) => {
 });
 
 // === Phantom Callback Route ===
-app.get('/wallet-connected', async (req, res) => {
-  const { d, telegramId, errorCode, errorMessage } = req.query;
-  if (errorCode) {
-    return res.send(`Phantom Error: ${decodeURIComponent(errorMessage)}`);
-  }
+// app.get('/wallet-connected', async (req, res) => {
+//   const { d, telegramId, errorCode, errorMessage } = req.query;
+//   if (errorCode) {
+//     return res.send(`Phantom Error: ${decodeURIComponent(errorMessage)}`);
+//   }
 
-  if (!d) {
-    return res.send('Missing wallet data or Telegram ID.');
-  }
-  if(!telegramId){
-    return res.send('Wallet connection was not completed. Please try again');
+//   if (!d) {
+//     return res.send('Missing wallet data or Telegram ID.');
+//   }
+//   if(!telegramId){
+//     return res.send('Wallet connection was not completed. Please try again');
+//   }
+
+//   try {
+//     const decoded = JSON.parse(Buffer.from(d, 'base64').toString());
+//     const publicKey = decoded.public_key;
+
+//     if (!publicKey) {
+//       return res.send('No public key returned from Phantom.');
+//     }
+
+//     await User.findOneAndUpdate(
+//       { telegramId },
+//       { walletAddress: publicKey },
+//       { upsert: true, new: true }
+//     );
+
+//     res.send('Wallet connected successfully! Return to Telegram and use /balance.');
+//   } catch (err) {
+//     console.error('Wallet connection error:', err);
+//     res.send('Wallet connection failed. Try again.');
+//   }
+// });
+app.get('/wallet-connected', async (req, res) => {
+  const { telegramId, phantom_encryption_public_key, nonce, data } = req.query;
+
+  if (!telegramId || !phantom_encryption_public_key || !nonce || !data) {
+    return res.send('Missing parameters. Wallet not connected.');
   }
 
   try {
-    const decoded = JSON.parse(Buffer.from(d, 'base64').toString());
-    const publicKey = decoded.public_key;
+    const phantomPublicKey = bs58.decode(phantom_encryption_public_key);
+    const decodedNonce = bs58.decode(nonce);
+    const encryptedData = bs58.decode(data);
+
+    const decrypted = nacl.box.open(
+      encryptedData,
+      decodedNonce,
+      phantomPublicKey,
+      dappKeyPair.secretKey
+    );
+
+    if (!decrypted) {
+      return res.send('Failed to decrypt data.');
+    }
+
+    const json = JSON.parse(Buffer.from(decrypted).toString('utf8'));
+    const publicKey = json.public_key;
 
     if (!publicKey) {
-      return res.send('No public key returned from Phantom.');
+      return res.send('Wallet public key not found in decrypted data.');
     }
 
     await User.findOneAndUpdate(
@@ -99,12 +141,13 @@ app.get('/wallet-connected', async (req, res) => {
       { upsert: true, new: true }
     );
 
-    res.send('Wallet connected successfully! Return to Telegram and use /balance.');
+    res.send('Wallet connected successfully! Go back to Telegram and type /balance');
   } catch (err) {
-    console.error('Wallet connection error:', err);
-    res.send('Wallet connection failed. Try again.');
+    console.error('Wallet decryption error:', err);
+    res.send('Something went wrong while connecting the wallet.');
   }
 });
+
 
 // === Start Express and Bot ===
 const PORT = process.env.PORT || 3000;
