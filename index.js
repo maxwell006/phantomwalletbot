@@ -30,7 +30,7 @@ bot.start((ctx) => {
 bot.command('connect', (ctx) => {
   const telegramId = ctx.from.id;
   const redirectUrl = `https://phantomwalletbot.onrender.com/wallet-connected?telegramId=${telegramId}`;
-  const deeplink = `https://phantom.app/ul/v1/connect?app_url=https://phantomwalletbot.onrender.com&redirect_link=${encodeURIComponent(redirectUrl)}`;
+  const deeplink = `https://phantom.app/ul/v1/connect?app_url=https://victorkelechi&redirect_link=${encodeURIComponent(redirectUrl)}`;
 
   ctx.reply('🔐 Click below to connect your Phantom Wallet:', {
     reply_markup: {
