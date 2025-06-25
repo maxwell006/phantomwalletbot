@@ -80,6 +80,8 @@ app.get('/wallet-connected', async (req, res) => {
   }
 
   if (!d || !telegramId) {
+    console.log("D:", d);
+     console.log("TelegramID:", telegramId);
     return res.send('Missing wallet data or Telegram ID.');
   }
 
